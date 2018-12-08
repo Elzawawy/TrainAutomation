@@ -3,7 +3,12 @@
 
 typedef struct Station 
 {
-    pthread_mutex_t train_lock;
+    int waitingPassengersNum;
+    int availableTrainSeatNum;
+    pthread_mutex_t station_lock;
+    pthread_cond_t train_in_station;
+    pthread_cond_t train_loaded;
+
     
 }Station;
 
