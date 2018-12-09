@@ -12,6 +12,12 @@ typedef struct Station
     pthread_cond_t next_train;
 }Station;
 
+typedef struct train_threadArgs
+{
+    int seatsNum;
+    Station * station;
+}train_threadArgs;
+
 void station_init(Station * station);
 void station_load_train(Station *station, int count);
 void station_wait_for_train(Station *station);

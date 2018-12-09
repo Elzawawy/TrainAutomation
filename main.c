@@ -1,9 +1,10 @@
 #include <pthread.h>
+#include <stdio.h>
 #include "train.h"
 void * train_thread(void * args)
 {
-    Station* station1=(struct Station*) args;
-    station_load_train(station1,10);
+    train_threadArgs * trainArgs =(struct train_threadArgs*) args;
+    station_load_train(trainArgs->station, trainArgs->seatsNum);
     pthread_exit(NULL);
 }
 void * passenger_thread(void * args)
@@ -15,16 +16,32 @@ void * passenger_thread(void * args)
 }
 int main()
 {
+    //Intialize Local Vraiables needed in program.
     Station station1;
     station_init(&station1);
-    pthread_t trains[5], passengers[50];
-    for (int i = 0; i < 50; ++i)
-        pthread_create(&passengers[i], NULL, passenger_thread, &station1);
-    for (int i = 0; i < 5; ++i)
-        pthread_create(&trains[i], NULL, train_thread, &station1);
-    for (int i = 0; i < 10; ++i)
-        pthread_join(passengers[i], NULL);
-    for (int i = 0; i < 5; ++i)
-        pthread_join(trains[i], NULL);
+    int trainThreadNum,passThreadNum;
+    
+
+    //Take input from user.
+    printf("Please enter number of Passengers : ");
+    scanf("%d",&passThreadNum);
+    printf("Please enter number of Trains : ");
+    scanf("%d",&trainThreadNum);
+    pthread_t train_threadArr[trainThreadNum],pass_threadArr[passThreadNum];
+    train_threadArgs trainArgs[trainThreadNum];
+    for(int i=0; i<trainThreadNum;i++)
+    {
+        printf("Enter Seat Number of Train %d : ",i+1);
+        scanf("%d",&trainArgs[i].seatsNum);
+        trainArgs[i].station = &station1;
+    }
+    for (int i = 0; i < passThreadNum; ++i)
+        pthread_create(&pass_threadArr[i], NULL, passenger_thread, &station1);
+    for (int i = 0; i < trainThreadNum; ++i)
+        pthread_create(&train_threadArr[i], NULL, train_thread, &trainArgs[i]);
+    for (int i = 0; i < passThreadNum; ++i)
+        pthread_join(pass_threadArr[i], NULL);
+    for (int i = 0; i < trainThreadNum; ++i)
+        pthread_join(train_threadArr[i], NULL);
     return 0;
 }
