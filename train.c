@@ -47,10 +47,21 @@ void station_load_train(Station *station, int count)
 
 void station_wait_for_train(Station *station)
 {
-   
+    pthread_mutex_lock(&station->station_mutex);
+    station->waitingPassengersNum++;
+    printf("Passenger %d waiting\n",station->waitingPassengersNum);
+    while( station->trainFlag == FLAG_DOWN || station->availableSeatsNum == 0) 
+        pthread_cond_wait(&(station->train_in_station), &(station->station_mutex));
+    printf("Passenger %d boarded\n",station->waitingPassengersNum);
+    if(station->waitingPassengersNum > 0)
+        station->waitingPassengersNum--;
 }
 
 void station_on_board(Station *station)
 {
-    
+    if(station->availableSeatsNum > 0)
+        station->availableSeatsNum--;
+    printf("Passenger Seated, Remaining Seats is\n",station->availableSeatsNum);
+    pthread_cond_signal(&(station->train_loaded));
+    pthread_mutex_unlock(&station->station_mutex);
 }
