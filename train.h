@@ -4,12 +4,11 @@
 typedef struct Station 
 {
     int waitingPassengersNum;
-    int availableTrainSeatNum;
-    pthread_mutex_t station_lock;
+    int availableSeatsNum;
+    int trainFlag;
+    pthread_mutex_t station_mutex;
     pthread_cond_t train_in_station;
     pthread_cond_t train_loaded;
-
-    
 }Station;
 
 void station_init(Station * station);
