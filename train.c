@@ -1,9 +1,17 @@
+/*
+ * Train Module to Control Station Functions and Struct Object. 
+ * 
+ * Author : Amr Elzawawy
+ * Date : 6 December 2018
+ */
 #include <pthread.h>
 #include <stdio.h>
 #include "train.h"
 
 #define FLAG_UP 1
 #define FLAG_DOWN 0
+
+/************ Initalize Station Vraiables *****************/
 void station_init(Station * station)
 {
     station->availableSeatsNum=0;
@@ -15,6 +23,7 @@ void station_init(Station * station)
     pthread_cond_init(&station->next_train,NULL);
 }
 
+/************ Train arrives Station **********************/
 void station_load_train(Station *station, int count)
 {
     //Try to acquire Station Lock.
@@ -49,23 +58,33 @@ void station_load_train(Station *station, int count)
     
 }
 
+/************ Passenger arrives Station **********************/
 void station_wait_for_train(Station *station)
 {
+    //Try to acquire lock.
     pthread_mutex_lock(&station->station_mutex);
+    //Number of Waiting Passengers increment.
     station->waitingPassengersNum++;
     printf("Passenger %d waiting\n",station->waitingPassengersNum);
+    //If there is no Train in Station, wait for it.
+    //If there is a Train but no seats left, wait for it.
     while( station->trainFlag == FLAG_DOWN || station->availableSeatsNum == 0) 
         pthread_cond_wait(&(station->train_in_station), &(station->station_mutex));
     printf("Passenger %d boarded\n",station->waitingPassengersNum);
+    //Number of Waiting Passengers decrement.
     if(station->waitingPassengersNum > 0)
         station->waitingPassengersNum--;
 }
 
+/************ Passenger leaves Station **********************/
 void station_on_board(Station *station)
 {
+    //Number of Available seats decrement.
     if(station->availableSeatsNum > 0)
         station->availableSeatsNum--;
     printf("Passenger Seated, Remaining Seats is %d \n",station->availableSeatsNum);
+    //Signal the Train that I am seated.
     pthread_cond_signal(&(station->train_loaded));
+    //Leave the station.
     pthread_mutex_unlock(&station->station_mutex);
 }
