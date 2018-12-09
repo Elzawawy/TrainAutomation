@@ -9,6 +9,7 @@ typedef struct Station
     pthread_mutex_t station_mutex;
     pthread_cond_t train_in_station;
     pthread_cond_t train_loaded;
+    pthread_cond_t next_train;
 }Station;
 
 void station_init(Station * station);
